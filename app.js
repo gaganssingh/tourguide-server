@@ -8,8 +8,11 @@ const userRouter = require("./routes/userRoutes");
 const app = express(); // INIT SERVER
 
 // MIDDLEWARES
+if (process.env.NODE_ENV === "development") {
+	app.use(morgan("dev")); //logging
+}
 app.use(express.json()); // Body parser
-app.use(morgan("dev")); //logging
+app.use(express.static(`${__dirname}/public`)); // Serving static files
 
 app.use((req, res, next) => {
 	console.log("🤚 from the middleware");
