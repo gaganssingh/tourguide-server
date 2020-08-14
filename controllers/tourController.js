@@ -11,13 +11,13 @@ exports.getAllTours = async (req, res) => {
 	console.log(req.query);
 	try {
 		// BUILD QUERY
-		// 1. Fintering
+		// 1a. Fintering
 		const queryObj = { ...req.query };
 		// Fields that need to be excluded from the req.query object
 		const excludedFields = [ "page", "sort", "limit", "fields" ];
 		excludedFields.forEach((el) => delete queryObj[el]);
 
-		// 2. Advanced Filtering
+		// 1b. Advanced Filtering
 		let queryString = JSON.stringify(queryObj);
 		// {difficulty: "easy", duration: {$gre: 5}}
 		// replace {gte, gt, lte, ls} with {$gte, $gt, $lte, $ls}
@@ -28,8 +28,17 @@ exports.getAllTours = async (req, res) => {
 		console.log("[queryString]", JSON.parse(queryString));
 
 		// Query the database
-		const query = Tour.find(JSON.parse(queryString));
+		let query = Tour.find(JSON.parse(queryString));
 
+		// 2. Sorting
+		if (req.query.sort) {
+			const sortBy = req.query.sort.split(",").join(" ");
+			// Using default mongoose ".sort" method
+			query = query.sort(sortBy); // sort("price ratingsAverage")
+		} else {
+			// sort by creation date -> newest one first
+			query = query.sort("-createdAt");
+		}
 		// Alternate way to query the db by
 		// chaining methods provided by mongoose
 		// const query = await Tour.find()
