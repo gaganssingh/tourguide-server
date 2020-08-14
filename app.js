@@ -30,7 +30,6 @@ app.use("/api/v1/users", userRouter);
 app.all("*", (req, res, next) => {
 	next(new AppError(`Invalid url: ${req.originalUrl}`, 404));
 });
-
 app.use(globalErrorHandler);
 
 module.exports = app;
