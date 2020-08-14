@@ -2,7 +2,17 @@ const fs = require("fs");
 
 const Tour = require("../models/tourModel"); // MongoDB Schema Model
 
+// MIDDLEWARES
+// Aliasing
+exports.aliasTopTours = (req, res, next) => {
+	req.query.limit = "5";
+	req.query.sort = "-ratingsAverage,price";
+	req.query.fields = "name,price,ratingsAverage,summary,difficulty";
+	next();
+};
+
 // HANDLER FUNCTIONS
+
 // *********************
 // /api/v1/tours
 // *********************
