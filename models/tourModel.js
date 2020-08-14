@@ -52,7 +52,7 @@ const tourSchema = new mongoose.Schema({
 		default : Date.now(),
 		select  : false // excludes this field from res objects sent to clients
 	},
-	startDate       : [ Date ] // An array of dates
+	startDates      : [ Date ] // An array of dates
 });
 
 // Mongo Model
