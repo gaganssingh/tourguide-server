@@ -5,7 +5,8 @@
 	"main": "server.js",
 	"scripts": {
 		"start": "nodemon server.js",
-		"start:prod": "NODE_ENV=production nodemon server.js"
+		"start:prod": "NODE_ENV=production nodemon server.js",
+		"debug": "ndb server.js"
 	},
 	"author": "Gagan Singh",
 	"license": "ISC",
@@ -18,6 +19,7 @@
 	},
 	"devDependencies": {
 		"morgan": "^1.10.0",
+		"ndb": "^1.1.5",
 		"nodemon": "^2.0.4"
 	},
 	"engines": {
