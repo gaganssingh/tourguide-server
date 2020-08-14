@@ -9,7 +9,26 @@ const Tour = require("../models/tourModel"); // MongoDB Schema Model
 // Get all tours
 exports.getAllTours = async (req, res) => {
 	try {
-		const tours = await Tour.find();
+		// BUILD QUERY
+		const queryObj = { ...req.query };
+
+		// Fields that need to be excluded from the req.query object
+		const excludedFields = [ "page", "sort", "limit", "fields" ];
+		excludedFields.forEach((el) => delete queryObj[el]);
+
+		// Query the database
+		const query = Tour.find(queryObj);
+
+		// Alternate way to query the db by
+		// chaining methods provided by mongoose
+		// const query = await Tour.find()
+		// 	.where("duration")
+		// 	.equals(5)
+		// 	.where("difficulty")
+		// 	.equals("easy");
+
+		// EXECUTE QUERY
+		const tours = await query;
 
 		res.status(200).json({
 			status  : "success",
