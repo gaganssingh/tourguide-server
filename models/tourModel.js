@@ -1,14 +1,17 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const validator = require("validator");
 
 // Define Schema
 const tourSchema = new mongoose.Schema(
 	{
 		name            : {
-			type     : String,
-			required : [ true, "A tour must have a name" ],
-			unique   : true,
-			trim     : true
+			type      : String,
+			required  : [ true, "A tour must have a name" ],
+			unique    : true,
+			trim      : true,
+			maxlength : [ 40, "A tour name must have at most 40 characters" ],
+			minlength : [ 10, "A tour name must have at least 10 characters" ]
 		},
 		slug            : String,
 		duration        : {
@@ -21,11 +24,18 @@ const tourSchema = new mongoose.Schema(
 		},
 		difficulty      : {
 			type     : String,
-			required : [ true, "A tour should have a difficulty" ]
+			required : [ true, "A tour should have a difficulty" ],
+			enum     : {
+				values  : [ "easy", "medium", "difficult" ],
+				message :
+					"Difficulty must be either one of: easy, medium, difficult"
+			}
 		},
 		ratingsAverage  : {
 			type    : Number,
-			default : 4.5
+			default : 4.5,
+			max     : [ 5, "Rating must be between 1 and 5" ],
+			min     : [ 1, "Rating must be between 1 and 5" ]
 		},
 		ratingsQuantity : {
 			type    : Number,
@@ -35,7 +45,16 @@ const tourSchema = new mongoose.Schema(
 			type     : Number,
 			required : [ true, "A tour must have a price" ]
 		},
-		priceDiscount   : Number,
+		priceDiscount   : {
+			type     : Number,
+			// CUSTOM VALIDATOR
+			validate : {
+				validator : function (val) {
+					return val < this.price; // DOESNOT work with update due to "this"
+				},
+				message   : "priceDiscount ({VALUE}) must be smaller than price"
+			}
+		},
 		summary         : {
 			type     : String,
 			required : [ true, "A tour must have a summary" ],
@@ -73,6 +92,7 @@ tourSchema.virtual("durationWeeks").get(function () {
 	return this.duration / 7; // Converting days to weeks -> 7 days tour to 1 week tour
 });
 
+// MIDDLEWARES
 // DATABASE MIDDLEWARES
 // Pre middleware -> Runs before .save() and .create() ONLY
 tourSchema.pre("save", function (next) {
