@@ -36,9 +36,22 @@ exports.getAllTours = async (req, res) => {
 			// Using default mongoose ".sort" method
 			query = query.sort(sortBy); // sort("price ratingsAverage")
 		} else {
+			// default
 			// sort by creation date -> newest one first
 			query = query.sort("-createdAt");
 		}
+
+		// 3. Field Limiting
+		if (req.query.fields) {
+			const fields = req.query.fields.split(",").join(" ");
+			// Using default mongoose ".select" method
+			query = query.select(fields); // select("name duration difficulty")
+		} else {
+			// default
+			// receive every field except __v
+			query = query.select("-__v");
+		}
+
 		// Alternate way to query the db by
 		// chaining methods provided by mongoose
 		// const query = await Tour.find()
