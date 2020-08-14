@@ -1,7 +1,6 @@
 const fs = require("fs");
 
 const Tour = require("../models/tourModel"); // MongoDB Schema Model
-const APIFeatures = require("../utils/apiFeatures");
 
 // MIDDLEWARES
 // Aliasing
@@ -21,14 +20,64 @@ exports.getAllTours = async (req, res) => {
 	console.log(req.query);
 	try {
 		// BUILD QUERY
-		const features = new APIFeatures(Tour.find(), req.query)
-			.filter()
-			.sort()
-			.limitFields()
-			.paginate();
+		// 1a. Fintering
+		const queryObj = { ...req.query };
+		// Fields that need to be excluded from the req.query object
+		const excludedFields = [ "page", "sort", "limit", "fields" ];
+		excludedFields.forEach((el) => delete queryObj[el]);
+
+		// 1b. Advanced Filtering
+		let queryString = JSON.stringify(queryObj);
+		// {difficulty: "easy", duration: {$gre: 5}}
+		// replace {gte, gt, lte, ls} with {$gte, $gt, $lte, $ls}
+		queryString = queryString.replace(
+			/\b(gte|gt|lte|lt)\b/g,
+			(match) => `$${match}`
+		);
+		console.log("[queryString]", JSON.parse(queryString));
+
+		// Query the database
+		let query = Tour.find(JSON.parse(queryString));
+
+		// 2. Sorting
+		if (req.query.sort) {
+			const sortBy = req.query.sort.split(",").join(" ");
+			// Using default mongoose ".sort" method
+			query = query.sort(sortBy); // sort("price ratingsAverage")
+		} else {
+			// default
+			// sort by creation date -> newest one first
+			query = query.sort("-createdAt");
+		}
+
+		// 3. Field Limiting
+		if (req.query.fields) {
+			const fields = req.query.fields.split(",").join(" ");
+			// Using default mongoose ".select" method
+			query = query.select(fields); // select("name duration difficulty")
+		} else {
+			// default
+			// receive every field except __v
+			query = query.select("-__v");
+		}
+
+		// 4. Pagination & Limiting
+		// ?page=2&limit=10
+		const page = Number(req.query.page) || 1;
+		const limit = Number(req.query.limit) || 100;
+		const skip = (page - 1) * limit; // For page 3 -> need to skip 200 results
+
+		query = query.skip(skip).limit(limit);
+
+		if (req.query.page) {
+			const numTours = await Tour.countDocuments();
+			if (skip >= numTours) throw new Error("This page does not exist");
+		}
 
 		// EXECUTE QUERY
-		const tours = await features.query;
+		const tours = await query;
+		// At this point, the query looks something like
+		// query.sort().select().skip().limit()
 
 		res.status(200).json({
 			status  : "success",
