@@ -20,7 +20,8 @@ const userSchema = new mongoose.Schema({
 	password        : {
 		type      : String,
 		required  : [ true, "Please provide a password" ],
-		minlength : [ 8, "Password must be atleast 8 characters" ]
+		minlength : [ 8, "Password must be atleast 8 characters" ],
+		select    : false // Flag that tells mongoose to not send this field back in response
 	},
 	passwordConfirm : {
 		type     : String,
@@ -31,7 +32,8 @@ const userSchema = new mongoose.Schema({
 			validator : function (el) {
 				return el === this.password; // returns true or false
 			},
-			message   : "Passwords are not the same"
+			message   : "Passwords are not the same",
+			select    : false // Flag that tells mongoose to not send this field back in response
 		}
 	}
 });
@@ -52,6 +54,12 @@ userSchema.pre("save", async function (next) {
 
 	next();
 });
+
+// INSTANCE METHOD - Available wherever this User model is imported
+// prettier-ignore
+userSchema.methods.comparePassword = async function(candidatePassword, userPassword) {
+	return await bcrypt.compare(candidatePassword, userPassword); // Returns true or false
+}
 
 // Mongo Model
 const User = mongoose.model("User", userSchema);

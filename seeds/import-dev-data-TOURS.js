@@ -52,5 +52,5 @@ if (process.argv[2] === "--import") {
 }
 
 // TO RUN THESE COMMANDS:
-// Import command: node seeds/import-dev-data.js --import
-// Delete command: node seeds/import-dev-data.js --delete
+// Import command: node seeds/import-dev-data-TOURS.js --import
+// Delete command: node seeds/import-dev-data-TOURS.js --delete
