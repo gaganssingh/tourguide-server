@@ -2,7 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 const userController = require("../controllers/userController");
+const authController = require("../controllers/authController");
 
+// These routes don't follow the MVC pattern
+router.post("/signup", authController.signup);
+
+// These routes follow the MVC pattern
 router
 	.route("/")
 	.get(userController.getAllUsers)
