@@ -1,5 +1,3 @@
-const fs = require("fs");
-
 const Tour = require("../models/tourModel"); // MongoDB Schema Model
 const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
@@ -30,6 +28,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 	// EXECUTE QUERY
 	const tours = await features.query;
 
+	// SEND RESPONSE
 	res.status(200).json({
 		status  : "success",
 		results : tours.length,
@@ -57,9 +56,10 @@ exports.createTour = catchAsync(async (req, res, next) => {
 // Get Tour By Id
 exports.getTour = catchAsync(async (req, res, next) => {
 	const tour = await Tour.findById(req.params.id);
+	// Tour.findOne({ _id: req.params.id })
 
 	if (!tour) {
-		return next(new AppError(`Tour with id ${req.params.id} not found`, 404));
+		return next(new AppError("No tour found with that ID", 404));
 	}
 
 	res.status(200).json({
@@ -91,7 +91,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 
 // Delete a tour by id
 exports.deleteTour = catchAsync(async (req, res, next) => {
-	const tour = await Tour.findByIdAndRemove(req.params.id);
+	const tour = await Tour.findByIdAndDelete(req.params.id);
 
 	if (!tour) {
 		return next(new AppError(`Tour with id ${req.params.id} not found`, 404));
@@ -116,7 +116,7 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
 				// _id        : "$difficulty",
 				// _id        : "$ratingsAverage",
 				_id        : { $toUpper: "$difficulty" },
-				num        : { $sum: 1 }, // For each db entry, add 1 to num
+				numTours   : { $sum: 1 },
 				numRatings : { $sum: "$ratingsQuantity" },
 				avgRating  : { $avg: "$ratingsAverage" },
 				avgPrice   : { $avg: "$price" },
@@ -144,10 +144,12 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
 
 // Unwinding and projecting
 exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
-	const year = Number(req.params.year);
+	const year = req.params.year * 1; // 2021
 
 	const plan = await Tour.aggregate([
-		{ $unwind: "$startDates" },
+		{
+			$unwind : "$startDates"
+		},
 		{
 			$match : {
 				startDates : {
