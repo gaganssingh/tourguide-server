@@ -1,5 +1,3 @@
-const { __esModule } = require("validator/lib/isPostalCode");
-
 class AppError extends Error {
 	constructor (message, statusCode) {
 		// Sets the message properity to the incoming message

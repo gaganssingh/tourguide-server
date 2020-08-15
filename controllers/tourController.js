@@ -3,6 +3,7 @@ const fs = require("fs");
 const Tour = require("../models/tourModel"); // MongoDB Schema Model
 const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
 
 // MIDDLEWARES
 // Aliasing
@@ -56,6 +57,11 @@ exports.createTour = catchAsync(async (req, res, next) => {
 // Get Tour By Id
 exports.getTour = catchAsync(async (req, res, next) => {
 	const tour = await Tour.findById(req.params.id);
+
+	if (!tour) {
+		return next(new AppError(`Tour with id ${req.params.id} not found`, 404));
+	}
+
 	res.status(200).json({
 		status : "success",
 		data   : {
@@ -71,6 +77,10 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 		runValidators : true
 	});
 
+	if (!tour) {
+		return next(new AppError(`Tour with id ${req.params.id} not found`, 404));
+	}
+
 	res.status(200).json({
 		status : "success",
 		data   : {
@@ -81,7 +91,12 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 
 // Delete a tour by id
 exports.deleteTour = catchAsync(async (req, res, next) => {
-	await Tour.findByIdAndRemove(req.params.id);
+	const tour = await Tour.findByIdAndRemove(req.params.id);
+
+	if (!tour) {
+		return next(new AppError(`Tour with id ${req.params.id} not found`, 404));
+	}
+
 	res.status(204).json({
 		status : "success",
 		data   : null
