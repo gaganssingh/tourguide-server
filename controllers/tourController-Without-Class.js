@@ -34,7 +34,6 @@ exports.getAllTours = async (req, res) => {
 			/\b(gte|gt|lte|lt)\b/g,
 			(match) => `$${match}`
 		);
-		console.log("[queryString]", JSON.parse(queryString));
 
 		// Query the database
 		let query = Tour.find(JSON.parse(queryString));

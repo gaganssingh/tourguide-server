@@ -20,7 +20,6 @@ class APIFeatures {
 			/\b(gte|gt|lte|lt)\b/g,
 			(match) => `$${match}`
 		);
-		console.log("[queryString]", JSON.parse(queryString));
 
 		// Query the database
 		this.query = this.query.find(JSON.parse(queryString));
