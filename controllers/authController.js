@@ -15,7 +15,7 @@ const signToken = (userId) =>
 // NEW USER SIGNUP
 exports.signup = catchAsync(async (req, res, next) => {
 	// Destructure variables received in request body
-	const { name, email, password, passwordConfirm } = req.body;
+	const { name, email, password, passwordConfirm, role } = req.body;
 	// NOTE: No need for manual validation, as validation
 	// is handled in the userModel file by the schema
 
@@ -24,7 +24,8 @@ exports.signup = catchAsync(async (req, res, next) => {
 		name,
 		email,
 		password,
-		passwordConfirm
+		passwordConfirm,
+		role
 	});
 
 	// Create JWT token
@@ -112,3 +113,21 @@ exports.protect = catchAsync(async (req, res, next) => {
 	req.user = currentUser;
 	next();
 });
+
+// Roles is an array, e.g. ["admin", "user"]
+// If no role specified in the request body, role="user"
+// as set as default in user model
+exports.restrictTo = (...roles) => {
+	return (req, res, next) => {
+		if (!roles.includes(req.user.role)) {
+			// req.user assigned in .protect() method above
+			return next(
+				new AppError(
+					"You do not have sufficient permissions to perform this action",
+					403
+				)
+			);
+		}
+		next();
+	};
+};
