@@ -1,14 +1,15 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
-	name              : {
+	name                 : {
 		type     : String,
 		required : [ true, "A user must have a name" ],
 		trim     : true
 	},
-	email             : {
+	email                : {
 		type      : String,
 		required  : [ true, "A user must have an email" ],
 		unique    : true,
@@ -16,19 +17,19 @@ const userSchema = new mongoose.Schema({
 		trim      : true,
 		validate  : [ validator.isEmail, "Invalid email id" ]
 	},
-	photo             : String,
-	role              : {
+	photo                : String,
+	role                 : {
 		type    : String,
 		enum    : [ "user", "guide", "lead-guide", "admin" ],
 		default : "user"
 	},
-	password          : {
+	password             : {
 		type      : String,
 		required  : [ true, "Please provide a password" ],
 		minlength : [ 8, "Password must be atleast 8 characters" ],
 		select    : false // Flag that tells mongoose to not send this field back in response
 	},
-	passwordConfirm   : {
+	passwordConfirm      : {
 		type     : String,
 		required : [ true, "Please confirm your password" ],
 		validate : {
@@ -41,7 +42,9 @@ const userSchema = new mongoose.Schema({
 			select    : false // Flag that tells mongoose to not send this field back in response
 		}
 	},
-	passwordChangedAt : Date
+	passwordChangedAt    : Date,
+	passwordResetToken   : String,
+	passwordResetExpires : Date // How long before the passwordResetToken expires
 });
 
 // MIDDLEWARES
@@ -58,6 +61,18 @@ userSchema.pre("save", async function (next) {
 	// so no need to store it in the db
 	this.passwordConfirm = undefined;
 
+	next();
+});
+
+// RE: Reset password function
+userSchema.pre("save", function (next) {
+	// If the password was not modified, do nothing and return
+	// .isModified() and .isNew() come from mongoose
+	if (!this.isModified("password") || this.isNew) return next();
+
+	// Actual time may be different. So use this "hack"
+	// of subtracting 1 second
+	this.passwordChangedAt = Date.now() - 1000;
 	next();
 });
 
@@ -80,6 +95,25 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
 	// DEFAULT: false
 	return false;
+};
+
+// RE: Forgot password route
+userSchema.methods.createPasswordResetToken = function () {
+	// Generate reset token
+	const resetToken = crypto.randomBytes(32).toString("hex");
+
+	this.passwordResetToken = crypto
+		.createHash("sha256") // Creates a hash for the resetToken
+		.update(resetToken)
+		.digest("hex");
+
+	console.log({ resetToken }, { database: this.passwordResetToken });
+
+	this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // Token expires in 10 minutes
+
+	// encrypted token is stored in the db
+	// but the unencrypted version is sent back to the user's email
+	return resetToken;
 };
 
 // Mongo Model

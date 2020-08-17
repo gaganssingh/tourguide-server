@@ -7,6 +7,8 @@ const authController = require("../controllers/authController");
 // These routes don't follow the MVC pattern
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
+router.post("/forgotPassword", authController.forgotPassword);
+router.patch("/resetPassword/:token", authController.resetPassword);
 
 // These routes follow the MVC pattern
 router
