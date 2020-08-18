@@ -11,7 +11,8 @@ router.post("/login", authController.login);
 router.post("/forgotPassword", authController.forgotPassword); // When user forgets password
 router.patch("/resetPassword/:token", authController.resetPassword); // When user forgets password
 
-router.patch("/updateMe", authController.protect, userController.updateMe); // User want to update info
+router.patch("/updateMe", authController.protect, userController.updateMe); // User wants to update their info
+router.delete("/deleteMe", authController.protect, userController.deleteMe); // User wants to Delete/Deactivate their account
 
 router.patch(
 	"/updateMyPassword",

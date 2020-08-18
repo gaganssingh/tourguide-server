@@ -42,8 +42,10 @@ exports.createUser = (req, res) => {
 	});
 };
 
-// Updare user info
-// User by the User to update their info
+// *********************
+// /api/v1/users/
+// *********************
+// Update user info - Used by the User to update their info
 exports.updateMe = catchAsync(async (req, res, next) => {
 	// Create error if user tries to update password
 	if (req.body.password || req.body.passwordConfirm)
@@ -68,6 +70,16 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 	res.status(200).json({
 		status : "success",
 		user   : updatedUser
+	});
+});
+
+// Delete/Deactivate USer Account - Used by the User to Delete/Deactivate their account
+exports.deleteMe = catchAsync(async (req, res, next) => {
+	await User.findByIdAndUpdate(req.user.id, { active: false });
+
+	res.status(204).json({
+		status : "success",
+		data   : null
 	});
 });
 

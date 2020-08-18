@@ -44,7 +44,15 @@ const userSchema = new mongoose.Schema({
 	},
 	passwordChangedAt    : Date,
 	passwordResetToken   : String,
-	passwordResetExpires : Date // How long before the passwordResetToken expires
+	passwordResetExpires : Date, // How long before the passwordResetToken expires
+	active               : {
+		// Marks if the user is active or not
+		// When user "deletes"/"deactivates" their account
+		// set active to false
+		type    : Boolean,
+		default : true,
+		select  : false // Flag that tells mongoose to not send this field back in response
+	}
 });
 
 // MIDDLEWARES
@@ -73,6 +81,16 @@ userSchema.pre("save", function (next) {
 	// Actual time may be different. So use this "hack"
 	// of subtracting 1 second
 	this.passwordChangedAt = Date.now() - 1000;
+	next();
+});
+
+// QUERY MIDDLEWARE
+// /^find/ is a Reg Exp to make the callback run for all methods
+// that start with find (e.g: find, findById etc)
+// HOW THIS WORKS: Whenever a mongoose method that starts with "find"
+// is run; like .find(), .findById() etc.; this will run before it
+userSchema.pre(/^find/, function (next) {
+	this.find({ active: { $ne: false } }); // when quering the db, only "find" users where {active: true}
 	next();
 });
 
