@@ -1,5 +1,20 @@
 const User = require("../models/userModel"); // MongoDB Schema Model
 const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+
+// HELPER FUNCTIONS
+const filterObj = (obj, ...allowedFields) => {
+	const newObj = {};
+	// loop through all fields on the incoming request's body
+	Object.keys(obj).forEach((el) => {
+		// If the allowed field is in the request body
+		if (allowedFields.includes(el)) {
+			// assign the allowed field and its value to the new object
+			newObj[el] = obj[el];
+		}
+	});
+	return newObj;
+};
 
 // *********************
 // /api/v1/users
@@ -27,6 +42,35 @@ exports.createUser = (req, res) => {
 	});
 };
 
+// Updare user info
+// User by the User to update their info
+exports.updateMe = catchAsync(async (req, res, next) => {
+	// Create error if user tries to update password
+	if (req.body.password || req.body.passwordConfirm)
+		return next(
+			new AppError(
+				"This route is not for password updates. Please use /updateMyPassword instead",
+				400
+			)
+		);
+
+	// Filter the info on incoming request body so
+	// that it only contains the correct information
+	// (filtering out unwanted fields, like: "role")
+	const filteredBody = filterObj(req.body, "name", "email");
+
+	// Update user document
+	const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+		new           : true,
+		runValidators : true
+	});
+
+	res.status(200).json({
+		status : "success",
+		user   : updatedUser
+	});
+});
+
 // *********************
 // /api/v1/users/:id
 // *********************
@@ -39,6 +83,7 @@ exports.getUser = (req, res) => {
 };
 
 // Update User By Id
+// Used by the admin to update a User's info
 exports.updateUser = (req, res) => {
 	res.status(500).json({
 		status  : "error",
