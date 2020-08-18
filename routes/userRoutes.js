@@ -7,8 +7,15 @@ const authController = require("../controllers/authController");
 // These routes don't follow the MVC pattern
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
-router.post("/forgotPassword", authController.forgotPassword);
-router.patch("/resetPassword/:token", authController.resetPassword);
+
+router.post("/forgotPassword", authController.forgotPassword); // When user forgets password
+router.patch("/resetPassword/:token", authController.resetPassword); // When user forgets password
+
+router.patch(
+	"/updateMyPassword",
+	authController.protect,
+	authController.updatePassword
+); // When user wants to simply update their password
 
 // These routes follow the MVC pattern
 router

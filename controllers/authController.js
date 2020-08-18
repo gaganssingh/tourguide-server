@@ -13,6 +13,20 @@ const signToken = (userId) =>
 		expiresIn : process.env.JWT_EXPIRES_IN
 	});
 
+const createSendToken = (user, statusCode, res) => {
+	// Create JWT token
+	const token = signToken(user._id);
+
+	// Send token to the cliend inside the response body
+	res.status(statusCode).json({
+		status : "success",
+		token,
+		data   : {
+			user
+		}
+	});
+};
+
 // ROUTES
 // NEW USER SIGNUP
 exports.signup = catchAsync(async (req, res, next) => {
@@ -30,17 +44,9 @@ exports.signup = catchAsync(async (req, res, next) => {
 		role
 	});
 
-	// Create JWT token
-	const token = signToken(newUser._id);
-
+	// Create JWT token and
 	// Send token to the cliend inside the response body
-	res.status(201).json({
-		status : "success",
-		token,
-		data   : {
-			user : newUser
-		}
-	});
+	createSendToken(newUser, "201", res);
 });
 
 // EXISTING USER LOG IN
@@ -66,12 +72,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 	// If everything checks out, create the auth token and
 	// send in response body
-	const token = signToken(user._id);
-
-	res.status(200).json({
-		status : "success",
-		token
-	});
+	createSendToken(user, "200", res);
 });
 
 // ROUTE PROTECTION BEHIND AUTHORIZATION
@@ -134,6 +135,7 @@ exports.restrictTo = (...roles) => {
 	};
 };
 
+// Generate token upon user forgot password
 exports.forgotPassword = catchAsync(async (req, res, next) => {
 	// 1) Get user based on POSTed email
 	const user = await User.findOne({ email: req.body.email });
@@ -175,6 +177,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 	}
 });
 
+// Reset password after user forgotPassword flow
+// User needs to click on the link in the email
+// sent during the forgotPassword flow
 exports.resetPassword = catchAsync(async (req, res, next) => {
 	// 1. Hash the user token on the request params,
 	// to compare to one token  stored in db
@@ -204,16 +209,52 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 	user.passwordResetExpires = undefined;
 
 	// Save updated user (with new password) in database
-	await user.save();
+	await user.save(); // Can't use .findById() and similar methods as they don't run the validation and ".pre"
 
 	// 3. Update changedPasswordAt property for current user
 	// Runs automatically as a "pre" middleware function - defined in userModel
 
-	// 4. Log the user in
-	const token = signToken(user._id);
+	// 4. Create a new token & Log the user in
+	createSendToken(user, "200", res);
+});
 
-	res.status(200).json({
-		status : "success",
-		token
-	});
+// Update password from user profile
+// Only from logged in users
+// exports.updatePassword = catchAsync(async (req, res, next) => {
+// 	// 1. Get user from db
+// 	// req.user containes user id as it was stored during the .protect route
+// 	const user = await User.findById(req.user.id).select("+password");
+
+// 	// 2. Check if current password supplied by user
+// 	// matches the current password stored in database
+// 	if (!await user.comparePassword(req.body.passwordCurrent, user.password)) {
+// 		return next(new AppError("You current password is wrong", 401));
+// 	}
+
+// 	// 3. Save updated password to db
+// 	user.password = req.body.password;
+// 	user.passwordConfirm = req.body.passwordConfirm;
+// 	await user.save(); // Can't use .findById() and similar methods as they don't run the validation and ".pre"
+
+// 	// 4. Login user using new password and jwt token
+// 	createSendToken(user, "200", res);
+// });
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+	// 1) Get user from collection
+	const user = await User.findById(req.user.id).select("+password");
+
+	// 2) Check if POSTed current password is correct
+	if (!await user.comparePassword(req.body.passwordCurrent, user.password)) {
+		return next(new AppError("Your current password is wrong.", 401));
+	}
+
+	// 3) If so, update password
+	user.password = req.body.password;
+	user.passwordConfirm = req.body.passwordConfirm;
+	await user.save();
+	// User.findByIdAndUpdate will NOT work as intended!
+
+	// 4) Log user in, send JWT
+	createSendToken(user, 200, res);
 });

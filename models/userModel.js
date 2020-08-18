@@ -77,6 +77,7 @@ userSchema.pre("save", function (next) {
 });
 
 // INSTANCE METHOD - Available wherever this User model is imported
+// Compare user supplied password to db stored password
 // prettier-ignore
 userSchema.methods.comparePassword = async function(candidatePassword, userPassword) {
 	return await bcrypt.compare(candidatePassword, userPassword); // Returns true or false
