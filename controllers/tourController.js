@@ -1,4 +1,6 @@
 const Tour = require("../models/tourModel"); // MongoDB Schema Model
+
+const factory = require("./handlerFactory");
 const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
@@ -89,18 +91,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 });
 
 // Delete a tour by id
-exports.deleteTour = catchAsync(async (req, res, next) => {
-	const tour = await Tour.findByIdAndDelete(req.params.id);
-
-	if (!tour) {
-		return next(new AppError(`Tour with id ${req.params.id} not found`, 404));
-	}
-
-	res.status(204).json({
-		status : "success",
-		data   : null
-	});
-});
+exports.deleteTour = factory.deleteOne(Tour);
 
 // AGGREGATION PIPELINE
 // Like "joins" and "group by" in SQL dbs

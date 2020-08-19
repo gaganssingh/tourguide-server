@@ -1,3 +1,4 @@
+const factory = require("./handlerFactory");
 const User = require("../models/userModel"); // MongoDB Schema Model
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
@@ -104,9 +105,4 @@ exports.updateUser = (req, res) => {
 };
 
 // Delete User By Id
-exports.deleteUser = (req, res) => {
-	res.status(500).json({
-		status  : "error",
-		message : "Route has not been defined"
-	});
-};
+exports.deleteUser = factory.deleteOne(User);
