@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const slugify = require("slugify");
 // const validator = require("validator");
 
+// const User = require("./userModel"); // Req'd for creating embedded "guides"
+
 // Define Schema
 const tourSchema = new mongoose.Schema(
 	{
@@ -112,7 +114,17 @@ const tourSchema = new mongoose.Schema(
 				description : String,
 				day         : Number
 			}
+		],
+		// Referencing the users:
+		guides          : [
+			{
+				type : mongoose.Schema.ObjectId,
+				ref  : "User" // mongoose automatically knows what schema we are refering to
+			}
 		]
+		// For embedding the user info the tours collection
+		// RUN ALONG WITH THE "EMBEDDING LOGIC BELOW"
+		// guides          : Array
 	},
 	{
 		toJSON   : { virtuals: true }, // Send "durationWeeks" virtual property
@@ -134,6 +146,19 @@ tourSchema.pre("save", function (next) {
 	this.slug = slugify(this.name, { lower: true });
 	next();
 });
+
+// Need to get the user information from the Users collections in db
+// to then store it under guides for that tour in an array
+// i.e. a tour could have multiple guides (users) assigned to it
+// EMBEDDING LOGIC
+// tourSchema.pre("save", async function (next) {
+// 	const guidesPromises = this.guides.map(
+// 		async (id) => await User.findById(id)
+// 	);
+// 	this.guides = await Promise.all(guidesPromises);
+
+// 	next();
+// });
 
 // tourSchema.pre("save", function (next) {
 // 	console.log("Second Pre-Middleware: Will save document next.");
