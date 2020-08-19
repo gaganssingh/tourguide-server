@@ -3,6 +3,11 @@ const router = express.Router();
 
 const tourController = require("../controllers/tourController");
 const authController = require("../controllers/authController");
+const reviewRouter = require("../routes/reviewRoutes");
+
+// GET /tour/:tourId/reviews/:reviewId
+// POST /tour/:id/reviews
+router.use("/:tourId/reviews", reviewRouter); // Mounting the reviewRouter in tourRouter
 
 // Alias Route
 router

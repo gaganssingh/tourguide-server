@@ -139,6 +139,13 @@ tourSchema.virtual("durationWeeks").get(function () {
 	return this.duration / 7;
 });
 
+// VIRTUAL POPULATE - To show all the reviews associated with a tour
+tourSchema.virtual("reviews", {
+	ref          : "Review",
+	foreignField : "tour",
+	localField   : "_id"
+});
+
 // MIDDLEWARES
 // DATABASE MIDDLEWARES
 // Pre middleware

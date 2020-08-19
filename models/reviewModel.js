@@ -40,25 +40,22 @@ const reviewSchema = new mongoose.Schema(
 // /^find/ is a Reg Exp to make the callback run for all methods
 // that start with find (e.g: find, findById etc)
 reviewSchema.pre(/^find/, function (next) {
+	// To populate both the associated tour and user in the review
+	// this.populate({
+	// 	path   : "tour",
+	// 	select : "name"
+	// }).populate({
+	// 	path   : "user", // .populate() to fill the user collection and return user data in the tour collection
+	// 	select : "name photo"
+	// });
+
 	this.populate({
-		path   : "tour",
-		select : "name"
-	}).populate({
 		path   : "user", // .populate() to fill the user collection and return user data in the tour collection
 		select : "name photo"
 	});
 
 	next();
 });
-
-// reviewSchema.pre(/^find/, function (next) {
-// 	this.populate({
-// 		path   : "tour", // .populate() to fill the user collection and return user data in the tour collection
-// 		select : "name"
-// 	});
-
-// 	next();
-// });
 
 // Mongo model
 const Review = mongoose.model("Review", reviewSchema);
