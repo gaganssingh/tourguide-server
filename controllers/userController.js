@@ -17,31 +17,19 @@ const filterObj = (obj, ...allowedFields) => {
 	return newObj;
 };
 
-// *********************
-// /api/v1/users
-// *********************
-// Get All Users
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-	// EXECUTE QUERY
-	const users = await User.find();
-
-	// SEND RESPONSE
-	res.status(200).json({
-		status  : "success",
-		results : users.length,
-		data    : {
-			users
-		}
-	});
-});
-
 // Create New User
 exports.createUser = (req, res) => {
 	res.status(500).json({
 		status  : "error",
-		message : "Route has not been defined"
+		message : "Route has not been defined. Please use /signup instead."
 	});
 };
+
+// *********************
+// /api/v1/users
+// *********************
+// Get All Users
+exports.getAllUsers = factory.getAll(User);
 
 // *********************
 // /api/v1/users/
@@ -74,7 +62,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 	});
 });
 
-// Delete/Deactivate USer Account - Used by the User to Delete/Deactivate their account
+// Delete/Deactivate User Account - Used by the User to Delete/Deactivate their account
 exports.deleteMe = catchAsync(async (req, res, next) => {
 	await User.findByIdAndUpdate(req.user.id, { active: false });
 
@@ -87,18 +75,9 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 // *********************
 // /api/v1/users/:id
 // *********************
-// Get User By Id
-exports.getUser = (req, res) => {
-	res.status(500).json({
-		status  : "error",
-		message : "Route has not been defined"
-	});
-};
-
-// Update User By Id
+exports.getUser = factory.getOne(User); // Get User By Id
+exports.updateUser = factory.updateOne(User); // Update User By Id
 // Used by the admin to update a User's info
 // so DON'T update password using this
-exports.updateUser = factory.updateOne(User);
 
-// Delete User By Id
-exports.deleteUser = factory.deleteOne(User);
+exports.deleteUser = factory.deleteOne(User); // Delete User By Id

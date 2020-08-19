@@ -8,6 +8,7 @@ const authController = require("../controllers/authController");
 // when mounting the reviewRouter in tourRoutes file
 const router = express.Router({ mergeParams: true });
 
+// /api/v1/reviews/
 router
 	.route("/")
 	.get(reviewController.getAllReviews) // GET /tour/:tourId/reviews/:reviewId
@@ -19,11 +20,11 @@ router
 		reviewController.createReview
 	);
 
+// /api/v1/reviews/:id
 router
 	.route("/:id")
-	// /api/v1/reviews/:id
+	.get(reviewController.getReview)
 	.patch(reviewController.updateReview)
-	// /api/v1/reviews/:id
 	.delete(reviewController.deleteReview);
 
 module.exports = router;

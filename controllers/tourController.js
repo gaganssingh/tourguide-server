@@ -1,9 +1,7 @@
 const Tour = require("../models/tourModel"); // MongoDB Schema Model
 
 const factory = require("./handlerFactory");
-const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/appError");
 
 // MIDDLEWARES
 // Aliasing
@@ -14,59 +12,18 @@ exports.aliasTopTours = (req, res, next) => {
 	next();
 };
 
-// HANDLER FUNCTIONS
 // *********************
 // /api/v1/tours
 // *********************
-// Get all tours
-exports.getAllTours = catchAsync(async (req, res, next) => {
-	// BUILD QUERY
-	const features = new APIFeatures(Tour.find(), req.query)
-		.filter()
-		.sort()
-		.limitFields()
-		.paginate();
-
-	// EXECUTE QUERY
-	const tours = await features.query;
-
-	// SEND RESPONSE
-	res.status(200).json({
-		status  : "success",
-		results : tours.length,
-		data    : {
-			tours
-		}
-	});
-});
-
-// Create New Tour
-exports.createTour = factory.createOne(Tour);
+exports.getAllTours = factory.getAll(Tour); // Get all tours
+exports.createTour = factory.createOne(Tour); // Create New Tour
 
 // *********************
 // /api/v1/tours/:id
 // *********************
-// Get Tour By Id
-exports.getTour = catchAsync(async (req, res, next) => {
-	const tour = await Tour.findById(req.params.id).populate("reviews");
-
-	if (!tour) {
-		return next(new AppError("No tour found with that ID", 404));
-	}
-
-	res.status(200).json({
-		status : "success",
-		data   : {
-			tour
-		}
-	});
-});
-
-// Update a tour by id
-exports.updateTour = factory.updateOne(Tour);
-
-// Delete a tour by id
-exports.deleteTour = factory.deleteOne(Tour);
+exports.getTour = factory.getOne(Tour, { path: "reviews" }); // Get Tour By Id
+exports.updateTour = factory.updateOne(Tour); // Update a tour by id
+exports.deleteTour = factory.deleteOne(Tour); // Delete a tour by id
 
 // AGGREGATION PIPELINE
 // Like "joins" and "group by" in SQL dbs
