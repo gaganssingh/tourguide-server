@@ -12,6 +12,7 @@ const globalErrorHandler = require("./controllers/errorController");
 // IMPORT ROUTES
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
+const reviewRouter = require("./routes/reviewRoutes");
 
 const app = express(); // INIT SERVER
 
@@ -57,6 +58,7 @@ app.use(mongoSanitize()); // Against NoSQL Query Injection. Removes all "$" char
 // MOUNT ROUTES
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 // ERROR HANDLING MIDDLEWARE
 app.all("*", (req, res, next) => {

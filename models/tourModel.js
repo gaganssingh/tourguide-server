@@ -82,7 +82,7 @@ const tourSchema = new mongoose.Schema(
 		createdAt       : {
 			type    : Date,
 			default : Date.now(),
-			select  : false // excludes this field from response object sent to client
+			select  : false // exclude from response object sent to client
 		},
 		startDates      : [ Date ], // An array of dates
 		secretTour      : {
@@ -115,7 +115,7 @@ const tourSchema = new mongoose.Schema(
 				day         : Number
 			}
 		],
-		// Referencing the users:
+		// Referencing the users collection
 		guides          : [
 			{
 				type : mongoose.Schema.ObjectId,
@@ -141,8 +141,9 @@ tourSchema.virtual("durationWeeks").get(function () {
 
 // MIDDLEWARES
 // DATABASE MIDDLEWARES
-// Pre middleware -> Runs before .save() and .create() ONLY
+// Pre middleware
 tourSchema.pre("save", function (next) {
+	//  "save": Runs before .save() and .create() ONLY
 	this.slug = slugify(this.name, { lower: true });
 	next();
 });
