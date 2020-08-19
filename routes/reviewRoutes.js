@@ -15,11 +15,14 @@ router
 		// POST /tour/:id/reviews
 		authController.protect, // Only logged in users can post review
 		authController.restrictTo("user"), // Only users with "role" of user can post review
+		reviewController.setTourUserIds, // Middleware to set some properties
 		reviewController.createReview
 	);
 
 router
 	.route("/:id")
+	// /api/v1/reviews/:id
+	.patch(reviewController.updateReview)
 	// /api/v1/reviews/:id
 	.delete(reviewController.deleteReview);
 

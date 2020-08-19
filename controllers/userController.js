@@ -97,12 +97,8 @@ exports.getUser = (req, res) => {
 
 // Update User By Id
 // Used by the admin to update a User's info
-exports.updateUser = (req, res) => {
-	res.status(500).json({
-		status  : "error",
-		message : "Route has not been defined"
-	});
-};
+// so DON'T update password using this
+exports.updateUser = factory.updateOne(User);
 
 // Delete User By Id
 exports.deleteUser = factory.deleteOne(User);
