@@ -5,7 +5,7 @@
 - Password reset using node's built-in crypto linrary, using SHA256 hashing
 
 ### Brute force attack prevention
-- Rate limiting
+- Rate limiting (prevents an IP from making too many requests at the same time)
 - Slower login attampts (using bcrypt)
 
 ### XSS protection
@@ -14,7 +14,7 @@
 - Hidden HTTP headers (using helmet)
 
 ### Denial-of-Service (DOS) attack prevention
-- Rate limiting
+- Rate limiting (prevents an IP from making too many requests at the same time)
 - Limited payload in request body
 
 ### NOSQL Query Injection prevention
