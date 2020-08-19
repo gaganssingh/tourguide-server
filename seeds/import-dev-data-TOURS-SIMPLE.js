@@ -20,7 +20,7 @@ mongoose
 
 // READ JSON FILE
 const tours = JSON.parse(
-	fs.readFileSync(`${__dirname}/../dev-data/data/tours.json`, "utf-8")
+	fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, "utf-8")
 );
 
 // IMPORT DATA INTO DB
@@ -52,5 +52,5 @@ if (process.argv[2] === "--import") {
 }
 
 // TO RUN THESE COMMANDS:
-// Import command: node seeds/import-dev-data-TOURS.js --import
-// Delete command: node seeds/import-dev-data-TOURS.js --delete
+// Import command: node seeds/import-dev-data-TOURS-SIMPLE.js --import
+// Delete command: node seeds/import-dev-data-TOURS-SIMPLE.js --delete

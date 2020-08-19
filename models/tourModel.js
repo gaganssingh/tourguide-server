@@ -86,7 +86,33 @@ const tourSchema = new mongoose.Schema(
 		secretTour      : {
 			type    : Boolean,
 			default : false
-		}
+		},
+		startLocation   : {
+			// Location where the tour starts
+			// Geospatial data (GeoJSON)
+			type        : {
+				type    : String,
+				default : "Point",
+				enum    : [ "Point" ]
+			},
+			coordinates : [ Number ], // Array of coordinates: [long, lat]
+			address     : String,
+			description : String
+		},
+		locations       : [
+			// All locations where this tour goes to
+			{
+				type        : {
+					type    : String,
+					default : "Point",
+					enum    : [ "Point" ]
+				},
+				coordinates : [ Number ],
+				address     : String,
+				description : String,
+				day         : Number
+			}
+		]
 	},
 	{
 		toJSON   : { virtuals: true }, // Send "durationWeeks" virtual property
