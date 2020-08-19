@@ -16,17 +16,26 @@ router
 
 // Aggretation Route
 router.route("/tour-stats").get(tourController.getTourStats);
-router.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
+router.route("/monthly-plan/:year").get(
+	authController.protect, // For protected route
+	authController.restrictTo("admin", "lead-guide", "guides"), // Authorized to certain user types
+	tourController.getMonthlyPlan
+);
 
-router
-	.route("/")
-	.get(authController.protect, tourController.getAllTours)
-	.post(tourController.createTour);
+router.route("/").get(tourController.getAllTours).post(
+	authController.protect, // For protected route
+	authController.restrictTo("admin", "lead-guide"), // Authorized to certain user types
+	tourController.createTour
+);
 
 router
 	.route("/:id")
 	.get(tourController.getTour)
-	.patch(tourController.updateTour)
+	.patch(
+		authController.protect, // For protected route
+		authController.restrictTo("admin", "lead-guide"), // Authorized to certain user types
+		tourController.updateTour
+	)
 	.delete(
 		authController.protect, // For protected route
 		authController.restrictTo("admin", "lead-guide"), // Authorized to certain user types

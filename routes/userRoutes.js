@@ -7,18 +7,19 @@ const authController = require("../controllers/authController");
 // These routes don't follow the MVC pattern
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
-
 router.post("/forgotPassword", authController.forgotPassword); // When user forgets password
 router.patch("/resetPassword/:token", authController.resetPassword); // When user forgets password
 
-router.patch("/updateMe", authController.protect, userController.updateMe); // User wants to update their info
-router.delete("/deleteMe", authController.protect, userController.deleteMe); // User wants to Delete/Deactivate their account
+// ALL routes after this middleware will be protected
+router.use(authController.protect);
 
-router.patch(
-	"/updateMyPassword",
-	authController.protect,
-	authController.updatePassword
-); // When user wants to simply update their password
+router.patch("/updateMyPassword", authController.updatePassword); // When user wants to simply update their password
+router.get("/me", userController.getMe, userController.getUser); // /api/v1/users/me
+router.patch("/updateMe", userController.updateMe); // /api/v1/users/updateMe User wants to update their info
+router.delete("/deleteMe", userController.deleteMe); // /api/v1/users/deleteMe User wants to Delete/Deactivate their account
+
+// ALL routes after this middleware can only be used by admins
+router.use(authController.restrictTo("admin"));
 
 // These routes follow the MVC pattern
 router

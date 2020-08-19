@@ -34,6 +34,11 @@ exports.getAllUsers = factory.getAll(User);
 // *********************
 // /api/v1/users/
 // *********************
+exports.getMe = (req, res, next) => {
+	req.params.id = req.user.id;
+	next();
+};
+
 // Update user info - Used by the User to update their info
 exports.updateMe = catchAsync(async (req, res, next) => {
 	// Create error if user tries to update password
