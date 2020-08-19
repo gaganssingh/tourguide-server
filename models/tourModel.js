@@ -132,6 +132,11 @@ const tourSchema = new mongoose.Schema(
 	}
 );
 
+// INDEX
+// tourSchema.index({ price: 1 }); // 1 for ASC order and -1 for DESC
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // 1 for ASC order and -1 for DESC
+tourSchema.index({ slug: 1 });
+
 // VIRTUAL PROPERTIES
 // REMEMBER: Can't use virtuals to query the db
 tourSchema.virtual("durationWeeks").get(function () {
