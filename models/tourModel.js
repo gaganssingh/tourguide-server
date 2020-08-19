@@ -181,6 +181,15 @@ tourSchema.pre(/^find/, function (next) {
 	next();
 });
 
+tourSchema.pre(/^find/, function (next) {
+	this.populate({
+		path   : "guides", // .populate() to fill the user collection and return user data in the tour collection
+		select : "-__v -passwordChangedAt"
+	});
+
+	next();
+});
+
 tourSchema.post(/^find/, function (docs, next) {
 	console.log(`Query took ${Date.now() - this.start} milliseconds!`);
 	next();
