@@ -36,6 +36,10 @@ const reviewSchema = new mongoose.Schema(
 	}
 );
 
+// INDEXING
+// One user can only write 1 review for a given tour
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // MIDDLEWARES
 // QUERY MIDDLEWARE
 // /^find/ is a Reg Exp to make the callback run for all methods
