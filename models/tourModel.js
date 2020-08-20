@@ -137,6 +137,7 @@ const tourSchema = new mongoose.Schema(
 // tourSchema.index({ price: 1 }); // 1 for ASC order and -1 for DESC
 tourSchema.index({ price: 1, ratingsAverage: -1 }); // 1 for ASC order and -1 for DESC
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: "2dsphere" }); // For geospatial search
 
 // VIRTUAL PROPERTIES
 // REMEMBER: Can't use virtuals to query the db
@@ -210,12 +211,12 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 // AGGREGATION MIDDLEWARE
-tourSchema.pre("aggregate", function (next) {
-	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+// tourSchema.pre("aggregate", function (next) {
+// 	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 
-	console.log(this.pipeline());
-	next();
-});
+// 	console.log(this.pipeline());
+// 	next();
+// });
 
 // Mongo Model
 const Tour = mongoose.model("Tour", tourSchema);

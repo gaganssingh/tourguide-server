@@ -22,6 +22,14 @@ router.route("/monthly-plan/:year").get(
 	tourController.getMonthlyPlan
 );
 
+// Find tours within a specific distance
+// /tours-within/150/center/-40,45/unit/km
+router
+	.route("/tours-within/:distance/center/:latlng/unit/:unit")
+	.get(tourController.getToursWithin);
+
+router.route("/distances/:latlng/unit/:unit").get(tourController.getDistances);
+
 router.route("/").get(tourController.getAllTours).post(
 	authController.protect, // For protected route
 	authController.restrictTo("admin", "lead-guide"), // Authorized to certain user types
