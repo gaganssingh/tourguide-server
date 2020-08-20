@@ -59,7 +59,8 @@ reviewSchema.pre(/^find/, function (next) {
 });
 
 // STATIC METHOD
-// Calculate average ratings and update the tourModel
+// Updating ratings quantity and averages stored tourModel
+// when a new review is added
 reviewSchema.statics.calcAverageRatings = async function (tourId) {
 	const stats = await this.aggregate([
 		{
@@ -75,10 +76,17 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
 	]);
 
 	// Update the Tour model with correct info
-	await Tour.findByIdAndUpdate(tourId, {
-		ratingsQuantity : stats[0].nRating,
-		ratingsAverage  : stats[0].avgRating
-	});
+	if (stats.length > 0) {
+		await Tour.findByIdAndUpdate(tourId, {
+			ratingsQuantity : stats[0].nRating,
+			ratingsAverage  : stats[0].avgRating
+		});
+	} else {
+		await Tour.findByIdAndUpdate(tourId, {
+			ratingsQuantity : 0,
+			ratingsAverage  : 4.5
+		});
+	}
 };
 
 reviewSchema.post("save", function () {
@@ -86,6 +94,17 @@ reviewSchema.post("save", function () {
 	// Cann't use Review.calcAvera... here as Review
 	// has not yet been defined
 	this.constructor.calcAverageRatings(this.tour);
+});
+
+// Updating ratings quantity and averages stored tourModel
+// when a new review is deleted or updated
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+	this.r = await this.findOne();
+	next();
+});
+reviewSchema.post(/^findOneAnd/, async function () {
+	this.r = await this.findOne(); // Can't be user as query has already executed
+	await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 // Mongo model
